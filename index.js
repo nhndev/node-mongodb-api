@@ -98,6 +98,8 @@ app.delete('/api/v1/books/:id', async (req, res) => {
     }
 })
 
-app.listen(8080, () => {
-    console.log("Server is running on port 8080")
+const PORT = process.env.PORT
+
+app.listen(PORT, () => {
+    console.log("Server is running on port " + PORT)
 })
