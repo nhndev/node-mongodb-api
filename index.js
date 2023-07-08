@@ -13,11 +13,28 @@ connectDB()
 const BookModel = require('./models/book.model')
 
 app.get('/api/v1/books', async (req, res) => {
+
+    const { limit = 5, orderBy = 'name', sortBy = 'asc', keyword } = req.query
+    let page = +req.query?.page
+
+    if (!page || page <= 0) page = 1
+
+    const skip = (page - 1) * +limit
+
+    const query = {}
+
+    if (keyword) query.name = { "$regex": keyword, "$options": "i" }
+
     try {
-        const data = await BookModel.find()
+        const data = await BookModel.find(query).skip(skip).limit(limit).sort({[orderBy]: sortBy})
+        const totalItems = await BookModel.countDocuments(query)
         return res.status(200).json({
             msg: 'Ok',
-            data
+            data,
+            totalItems,
+            totalPages: Math.ceil(totalItems / limit),
+            limit: +limit,
+            currentPage: page
         })
     } catch (error) {
         return res.status(500).json({
